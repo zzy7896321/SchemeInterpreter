@@ -1,0 +1,7 @@
+Scheme interpreter
+PPCA (2013 summer) project
+
+1. Objective: to implement a subset of r5rs.
+
+2. Known problems:
+	(1) Do no support unicode.
