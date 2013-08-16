@@ -148,6 +148,15 @@ callResultType begin_func(sptrEnvironment& env, sptrParseTree root, sptrObject& 
  */
 callResultType delay_func(sptrEnvironment& env, sptrParseTree root, sptrObject& obj, bool enableTailRecursion = false);
 
+/**
+ * Other syntatic keyword
+ * else
+ * =>
+ * should only appear in conditional syntax
+ */
+callResultType rightArrow_func(sptrEnvironment& env, sptrParseTree root, sptrObject& obj, bool enableTailRecursion = false);
+callResultType else_func(sptrEnvironment& env, sptrParseTree root, sptrObject& obj, bool enableTailRecursion = false);
+
 inline SyntaxMapType& getSyntaxMap(){
 	static SyntaxMapType syntaxMap({ {"quote", quote_func},
 									 {"lambda", lambda_func},
@@ -168,7 +177,9 @@ inline SyntaxMapType& getSyntaxMap(){
 									 {"letrec", letrec_func},
 									 {"begin", begin_func},
 									 //{"do", do_func},
-									 {"delay", delay_func}
+									 {"delay", delay_func},
+									 {"=>", rightArrow_func},
+									 {"else", else_func}
 									});
 
 	return syntaxMap;

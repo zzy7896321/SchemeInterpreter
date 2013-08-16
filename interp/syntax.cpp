@@ -1,6 +1,7 @@
 #include "syntax.h"
 #include "evaluation.h"
 #include "../config.h"
+#include "../prompt/prompt_declaration.h"
 
 #include <algorithm>
 
@@ -256,6 +257,7 @@ callResultType quasiquote_func(sptrEnvironment& env, sptrParseTree root, sptrObj
 	std::stack<sptrParseTree> father;
 	std::vector<sptrObject> eval_res;
 	auto cur = root->next;
+	int nest_level = 0;
 	while (cur || !father.empty()){
 		if (cur){
 			switch (cur->obj->getType()){
@@ -285,56 +287,75 @@ callResultType quasiquote_func(sptrEnvironment& env, sptrParseTree root, sptrObj
 
 				case ObjectDef::ObjectType::SYMBOL:
 				{
-					if (eval_res.back() == father.top()->obj){
+					if (!father.empty() && eval_res.back() == father.top()->obj){
 						if (static_cast<ObjectDef::Symbol*>(cur->obj.get())->getVal() == "unquote"){
-							if (!cur->next){
-								return std::make_pair(EVAL_BAD_SYNTAX, "(unquote) too few argument");
-							}
-							if (cur->next->next){
-								return std::make_pair(EVAL_BAD_SYNTAX, "(unquote) too many arguments");
-							}
+                            if (nest_level--){
+                                eval_res.push_back(cur->obj);
+                                cur = cur->next;
+                            } else {
+                                if (!cur->next){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "(unquote) too few argument");
+                                }
+                                if (cur->next->next){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "(unquote) too many arguments");
+                                }
 
-							if (father.empty() || eval_res.back() != father.top()->obj){
-                                return std::make_pair(EVAL_BAD_SYNTAX, "unexpected syntatic keyword");
-							}
+                                if (father.empty() || eval_res.back() != father.top()->obj){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "unexpected syntatic keyword");
+                                }
 
-							sptrObject ret;
-							auto callRes = evaluateParseTree(env, cur->next, ret);
-							if (callRes.first != EVAL_NO_ERROR) return std::move(callRes);
+                                sptrObject ret;
+                                auto callRes = evaluateParseTree(env, cur->next, ret);
+                                if (callRes.first != EVAL_NO_ERROR) return std::move(callRes);
 
-							eval_res.back() = ret;
-							cur = father.top()->next;
-							father.pop();
+                                eval_res.back() = ret;
+                                cur = father.top()->next;
+                                father.pop();
+
+                                ++nest_level;
+                            }
 						}
 						else if (static_cast<ObjectDef::Symbol*>(cur->obj.get())->getVal() == "unquote-splicing"){
-							if (!cur->next){
-								return std::make_pair(EVAL_BAD_SYNTAX, "(unquote-splicing) too few argument");
-							}
-							if (cur->next->next){
-								return std::make_pair(EVAL_BAD_SYNTAX, "(unquote-splicing) too many arguments");
-							}
+                            if (nest_level--){
+                                eval_res.push_back(cur->obj);
+                                cur = cur->next;
+                            } else {
+                                if (!cur->next){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "(unquote-splicing) too few argument");
+                                }
+                                if (cur->next->next){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "(unquote-splicing) too many arguments");
+                                }
 
-							if (father.empty() || eval_res.back() != father.top()->obj){
-                                return std::make_pair(EVAL_BAD_SYNTAX, "unexpected syntatic keyword");
-							}
+                                if (father.empty() || eval_res.back() != father.top()->obj){
+                                    return std::make_pair(EVAL_BAD_SYNTAX, "unexpected syntatic keyword");
+                                }
 
-							sptrObject ret;
-							auto callRes = evaluateParseTree(env, cur->next, ret);
-							if (callRes.first != EVAL_NO_ERROR) return std::move(callRes);
+                                sptrObject ret;
+                                auto callRes = evaluateParseTree(env, cur->next, ret);
+                                if (callRes.first != EVAL_NO_ERROR) return std::move(callRes);
 
-                            eval_res.pop_back();
+                                eval_res.pop_back();
 
-							while (ret->getType() == ObjectDef::ObjectType::PAIR){
-								eval_res.push_back(static_cast<ObjectDef::Pair*>(ret.get())->getCar());
-								ret = static_cast<ObjectDef::Pair*>(ret.get())->getCdr();
-							}
+                                while (ret->getType() == ObjectDef::ObjectType::PAIR){
+                                    eval_res.push_back(static_cast<ObjectDef::Pair*>(ret.get())->getCar());
+                                    ret = static_cast<ObjectDef::Pair*>(ret.get())->getCdr();
+                                }
 
-							if (ret->getType() != ObjectDef::ObjectType::EMPTYLIST){
-								return std::make_pair(EVAL_PARAMETER_TYPE_MISMATCH, "unquote-splicing expect a list");
-							}
+                                if (ret->getType() != ObjectDef::ObjectType::EMPTYLIST){
+                                    return std::make_pair(EVAL_PARAMETER_TYPE_MISMATCH, "unquote-splicing expect a list");
+                                }
 
-							cur = father.top()->next;
-							father.pop();
+                                cur = father.top()->next;
+                                father.pop();
+
+                                ++nest_level;
+                            }
+						}
+						else if (static_cast<ObjectDef::Symbol*>(cur->obj.get())->getVal() == "quasiquote"){
+                            ++nest_level;
+                            eval_res.push_back(cur->obj);
+                            cur = cur->next;
 						}
 						else {
 							eval_res.push_back(cur->obj);
@@ -360,6 +381,18 @@ callResultType quasiquote_func(sptrEnvironment& env, sptrParseTree root, sptrObj
 			father.pop();
 			auto begin_of_list = eval_res.end();
 			for ( --begin_of_list; *begin_of_list != cur->obj; --begin_of_list);
+
+            if (begin_of_list + 1 != eval_res.end() && (*(begin_of_list+1))->getType() == ObjectDef::ObjectType::SYMBOL){
+                if (static_cast<ObjectDef::Symbol*>((begin_of_list+1)->get())->getVal() == "unquote"){
+                    ++nest_level;
+                }
+                else if (static_cast<ObjectDef::Symbol*>((begin_of_list+1)->get())->getVal() == "unquote-splicing"){
+                    ++nest_level;
+                }
+                else if (static_cast<ObjectDef::Symbol*>((begin_of_list+1)->get())->getVal() == "quasiquote"){
+                    --nest_level;
+                }
+            }
 
 			sptrObject tail;
 			auto end_of_list = eval_res.end() - 1;
@@ -962,6 +995,14 @@ callResultType delay_func(sptrEnvironment& env, sptrParseTree root, sptrObject& 
 
 	obj = sptrObject(new ObjectDef::Promise(root->next, env));
 	return std::make_pair(EVAL_NO_ERROR, "");
+}
+
+callResultType rightArrow_func(sptrEnvironment& env, sptrParseTree root, sptrObject& obj, bool){
+    return std::make_pair(EVAL_BAD_SYNTAX, "=>: not in cond");
+}
+
+callResultType else_func(sptrEnvironment& env, sptrParseTree root, sptrObject& obj, bool){
+    return std::make_pair(EVAL_BAD_SYNTAX, "else: not in conditional expression");
 }
 
 }
