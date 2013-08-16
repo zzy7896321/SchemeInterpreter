@@ -22,7 +22,7 @@
 \newpage
 
 \section{Introduction}
-Scheme Interpreter is an implementation of a subset of $\textrm{Revised}^5$ Report on the Algorithmic Language Scheme (R5RS). It supports most syntax, data types and procedures defined by R5RS. The project is written in C++. Due to the use of multiple C++11 features, a compiler that supports C++11 is needed to build the project. GNU GMP, GNU MPFR, GNU MPC are introduced to implement the number types. These libraries are distributed under the Gnu Lesser General Public License.
+Scheme Interpreter is an implementation of a subset of $\textrm{Revised}^5$ Report on the Algorithmic Language Scheme (R5RS). It supports most syntax, data types and procedures defined by R5RS. The project is written in C++. Due to the use of multiple C++11 features, a compiler that supports C++11 is needed to build the project. GNU MP, GNU MPFR, GNU MPC are introduced to implement the number types. These libraries are distributed under the Gnu Lesser General Public License.
 
 \section{Build}
 There is a Code::Blocks project file provided. It was created by Code::Blocks IDE 12.11.
@@ -47,7 +47,7 @@ It will turn on file log which records each evaluation in run.log, and
 print the type of return value of each evaluation. However, when running complicated
 user-defined procedures, definging the macro may led to a huge performance loss and
 rapid consumption of disk space because of the recording of evalution.
-The scheme interpreter project used 3 thrid-party library: GNU GMP, GNU MPFR, GNU MPC.
+The scheme interpreter project used 3 thrid-party library: GNU MP, GNU MPFR, GNU MPC.
 These libraries needs to be installed on your system. In the cbp file, the linking
 options are all static:
 

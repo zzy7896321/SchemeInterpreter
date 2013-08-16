@@ -38,7 +38,7 @@ Scheme interpreter (PPCA 2013 Summer Project)
 	user-defined procedures, definging the macro may led to a huge performance loss and
 	rapid consumption of disk space because of the recording of evalution.
 
-	The scheme interpreter project used 3 thrid-party library: GNU GMP, GNU MPFR, GNU MPC.
+	The scheme interpreter project used 3 thrid-party library: GNU MP, GNU MPFR, GNU MPC.
 	These libraries needs to be installed on your system. In the cbp file, the linking
 	options are all static:
 		-l:libmpc.a -l:libmpfr.c -l:libgmpxx.a -l:libgmp.a
