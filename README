@@ -20,7 +20,11 @@ Scheme interpreter (PPCA 2013 Summer Project)
 		  For details, please refer to manual.pdf.
 
 2. Compile
-	There is a Code::Blocks project file provieded.
+	There is a Code::Blocks project file provided. It was created by Code::Blocks IDE 12.11.
+	The project was successfully complied by GNU GCC 4.7.3 on Linux Mint 15 Olivia 32-bit. 
+	It was also successfully compiled by MinGW GCC 4.7.2 on Windows 7 x86, 
+	which need a patch to enable std::to\_string and std::stoi. 
+	Refer to http://tehsausage.com/mingw-to-string.
 	
 	The debug mode compile and linking options are:
 		g++ -Wall -fexceptions -std=c++11 -g  -l:libmpc.a -l:libmpfr.a -l:libgmpxx.a -l:libgmp.a
@@ -70,8 +74,9 @@ Scheme interpreter (PPCA 2013 Summer Project)
 									stored as integer or rational. The default length is 10.
 									Set length to 0 to forbid such conversion.
 
-	-mp <length>                	Set the maximum length of prefix zero that a real number will be displayed. If
-									a real number cannot be displayed in fixed point form without exceeding the limit,
+	-mp <length>                	Set the maximum length of prefix zero (which does not include the zero before the
+									decimal dot) that a real number will be displayed. If a real number cannot be 
+									displayed in fixed point form without exceeding the limit,
 									it will be displayed in scientific form. The default length is 10.
 									Set length to 0 to disable prefix zero.
 								
@@ -80,6 +85,8 @@ Scheme interpreter (PPCA 2013 Summer Project)
 	If there is no options provided, the program will use the default configuration and directly enter
 	interaction mode. Otherwise, the options are processed sequentially and enter the interaction mode
 	using the provided configuration.
+	
+	For more details, refer to manual.pdf.
 
 4. Author: Zhuoyue Zhao
    Contact me at zzy7896321@163.com

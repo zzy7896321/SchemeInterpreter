@@ -1,0 +1,634 @@
+\documentclass{article}
+
+\usepackage{ctex}
+\usepackage{amsfonts,amsmath,amssymb,graphicx,url}
+
+\setlength{\oddsidemargin}{.25in}
+\setlength{\evensidemargin}{.25in}
+\setlength{\textwidth}{6.25in}
+\setlength{\topmargin}{-0.4in}
+\setlength{\textheight}{8.5in}
+
+\title{Scheme Interpreter(PPCA 2013 Summer Project)}
+\author{赵卓越}
+\date{2013.8}
+
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+Scheme Interpreter is an implementation of a subset of $\textrm{Revised}^5$ Report on the Algorithmic Language Scheme (R5RS). It supports most syntax, data types and procedures defined by R5RS. The project is written in C++. Due to the use of multiple C++11 features, a compiler that supports C++11 is needed to build the project. GNU GMP, GNU MPFR, GNU MPC are introduced to implement the number types. These libraries are distributed under the Gnu Lesser General Public License.
+
+\section{Build}
+There is a Code::Blocks project file provided. It was created by Code::Blocks IDE 12.11.
+The project was successfully complied by GNU GCC 4.7.3 on Linux Mint 15 Olivia 32-bit. It was also successfully compiled by MinGW GCC 4.7.2 on Windows 7 x86, which need a patch to enable std::to\_string and std::stoi. Refer to http://tehsausage.com/mingw-to-string.
+
+\noindent
+The debug mode compile and linking options are:
+	
+	g++ -Wall -fexceptions -std=c++11 -g  -l:libmpc.a -l:libmpfr.a -l:libgmpxx.a -l:libgmp.a
+
+\noindent
+The release mode compile and linking options are:
+		
+	g++ -Wall -fexceptions -O2 -std=c++11 -DNDEBUG  -l:libmpc.a -l:libmpfr.a -l:libgmpxx.a \\ \quad -l:libgmp.a
+
+\noindent
+If you want additional dubug infomation, define marco
+
+	\_SCMINTERP\_DEBUG\_PRINT\_
+
+It will turn on file log which records each evaluation in run.log, and
+print the type of return value of each evaluation. However, when running complicated
+user-defined procedures, definging the macro may led to a huge performance loss and
+rapid consumption of disk space because of the recording of evalution.
+The scheme interpreter project used 3 thrid-party library: GNU GMP, GNU MPFR, GNU MPC.
+These libraries needs to be installed on your system. In the cbp file, the linking
+options are all static:
+
+	-l:libmpc.a -l:libmpfr.a -l:libgmpxx.a -l:libgmp.a
+
+\noindent
+For more details on these libraries, refer to their websites:
+
+	http://gmplib.org
+
+	http://www.mpfr.org
+
+	http://www.multiprecision.org
+
+\noindent
+	source files are:
+	
+		./builtin/*
+		
+		./interp/*
+	
+		./object/*
+
+		./parser/*
+
+		./prompt/*
+
+		config.cpp
+
+		config.h
+
+\section{Run}
+	schemeInterpreter [OPTIONS]...
+
+	Valid options:
+	
+	-h : Show the help and exit.
+
+	-l <filename> : Load the specified file before interaction begins. Multiple files can be loaded by providing multiple -l parameters. Files would be loaded in the sequence they're provided. By default, no file will be loaded.
+
+	-f <precision> : Set the floating point precision. Input that is less than 64 will be ignored. The default precision is 128. Only the last valid input will take effect.
+
+	-cl <length> : Set the maximum length of inexact number literal that would be stored as integer or rational. The default length is 10. Set length to 0 to forbid such conversion.
+
+	-mp <length> : Set the maximum length of prefix zero (which does not include the zero before the decimal dot) that a real number will be displayed. If a real number cannot be displayed in fixed point form without exceeding the limit, it will be displayed in scientific form. The default length is 10. Set length to 0 to disable prefix zero.
+	
+	-np : Disable protection of builtin symbols.
+
+	
+	If there is no options provided, the program will use the default configuration and directly enter
+	interaction mode. Otherwise, the options are processed sequentially and enter the interaction mode
+	using the provided configuration.
+	
+	When the interpreter enters interaction mode, the user can type any scheme expressions. Errors of parsing is reported as early as possible, but input following the error will still be parsed. After a successful parsing, the parsing result will be evaluated, any evaluation error are reported as early as possible. After a successful evaluation, the return value is printed in the form of external representation. Each output begins with " ==> " and ends with a newline.
+	
+	Note: -f -cl -mp -np options could have significant impact on the behaviour of the interpreter.
+
+\section{Implementation features}
+
+Most syntax, data types and procedures defined by R5RS are implemented, except hygienic macro, continuation, do syntax, vector, port and procedures related to them. Supported and unsupported features, minor behaviour difference from R5RS, unspecified behaviour are given in this section.
+
+If a supported feature is not described, it is thought to conform to R5RS, while unspecified behaviour and violation to R5RS are give under the features. For details on the standard of the feature, refer to R5RS.
+
+\subsection{Syntax}
+
+\begin{itemize}
+
+\item R5RS Section 4.1.1 Varibale references:
+	\begin{itemize}
+		\item <variable> \hfill syntax
+	\end{itemize}		 
+
+\item R5RS Section 4.1.2 Literal expressions:
+	\begin{itemize}
+		\item	(quote <datum>)	\hfill	syntax
+		\item	'<datum>	\hfill	syntax
+		\item	<constant>	\hfill syntax
+	\end{itemize}
+
+\item R5RS Section 4.1.3 Procedure calls
+	\begin{itemize}
+		\item (<operator> <$\textrm{oprand}_1$> ...)	\hfill	syntax
+		
+		R5RS claims that the evaluation of operator and operands are in an unspecified consistent order. In this implementation, the evaluation order is always from left to right.
+	\end{itemize}
+
+\item R5RS Section 4.1.4 Procedures
+	\begin{itemize}
+		\item (lambda <formals> <body>)	\hfill	syntax
+		
+		Note: In this implementation, lambda do not perform syntax check on <body>. Syntax check of <body> only happens during a procedure call.
+	\end{itemize}
+	
+\item R5RS Section 4.1.5 Conditionals
+	\begin{itemize}
+		\item (if <test> <consequent> <alternate>)	\hfill	syntax
+		\item (if <test> <consequent>)	\hfill	syntax
+		
+		R5RS claims that if <test> yields a false value and no <alternate> is specified, then the result of the expression is unspecified. In this implementation, the return value is an object of void type.
+	\end{itemize}
+	
+\item R5RS Section 4.1.6 Assignments
+	\begin{itemize}
+		\item (set! <variable> <expression>)	\hfill	syntax		
+		
+		R5RS claims that the result of the set! expression is unspecified. In this implementation, the return value is an object of void type.
+		
+		There is no claim that whether variables of builtin procedures could be assigned. In this implementation, such assignment is disallowed by default, or it can be enabled by -np option.
+	\end{itemize}
+	
+\item R5RS Section 4.2.1 Conditionals
+	\begin{itemize}
+		\item (cond <$\textrm{clause}_1$> ...)	\hfill	library syntax
+		
+		R5RS requires cond to have at least one clause. In this implementation, no clause cond is allowed and it returns an object of void type. If no clause's test evaluate to true value, cond returns an object of void type.
+		
+		\item (case <key> <$\textrm{clause}_1$> ...)	\hfill	library syntax
+		
+		R5RS requires case to have at least one clause. In this implementation, no clause cond is allowed and it returns an object of void type. If no clause's test evaluate to true value, cond returns an object of void type.
+		
+		Note: case always uses the builtin eqv?, assignment to eqv? never affects the behaviour of case.
+	
+		\item (and <$\textrm{test}_1$> ...)	\hfill	library syntax
+		
+		\item (or <$\textrm{test}_1$> ...)	\hfill	library syntax
+	\end{itemize}
+	
+\item R5RS Section 4.2.2 Binding Constructs
+	\begin{itemize}
+		\item (let <bindings> <body>)	\hfill	library syntax
+		
+		R5RS claims that the evaluation of <init>s is in unspecified order. In this implementation, the order is always from left to right.
+		
+		\item (let* <bindings> <body>)	\hfill	library syntax
+		
+		\item (letrec <bindings> <body>)	\hfill library syntax
+		
+		R5RS claims that the evaluation of <init>s is in unspecified order. In this implementation, the order is always from left to right.
+		
+		R5RS requires evaluating referencing any <variable> in <bindings> before all <init> have been evaluated to be an error. In this implementation, it the result of reference is evaluated to an object of void, which in common cases could probably lead to an error of type mismatch.
+	\end{itemize}
+	
+\item R5RS Section 4.2.3 Sequencing
+	\begin{itemize}
+		\item (begin <$\textrm{expression}_1$> ...)	\hfill	library syntax
+		
+		R5RS requires begin followed by at least one expression. In this implementation, no expression following begin is allowed, which will be evaluated to an object of void type.
+	\end{itemize}
+	
+\item R5RS Section 4.2.4 Iteration
+	\begin{itemize}
+		\item (do ((<$\textrm{variable}_1$> <$\textrm{init}_1$> <$\textrm{step}_1$>) ...)
+		
+			  \qquad (<test> <expression> ...)
+			   <command> ...)	\hfill library syntax
+			   
+		Unsupported.
+		
+		\item (let <variable> <bindings> <body>)	\hfill	library syntax
+		
+		R5RS claims that the evaluation of <init>s is in unspecified order. In this implementation, the order is always from left to right.
+	\end{itemize}
+	
+\item R5RS Section 4.2.5 Delayed evaluation
+	\begin{itemize}
+		\item (delay <expression> ...)	\hfill	library syntax
+		
+		R5RS requires delay followed by only one expression. In this implementation, multiple expressions are allowed. They will be evaluated from left to right when forced and result is the value of the last expression.
+	\end{itemize}
+	
+\item R5RS Section 4.2.6 Quasiquotation
+	\begin{itemize}
+		\item (quasiquote <qq template>)	\hfill	syntax
+		\item `<qq template>	\hfill	syntax
+	\end{itemize}
+	
+\item R5RS Section 4.3 Macros
+	
+	Unsupported. Related syntax is not supported either, including let-syntax, letrec-syntax, syntax-rules, define-syntax.
+	
+\item R5RS Section 5.2 Definitions
+	\begin{itemize}
+		\item (define <variable> <expression>)	\hfill	syntax
+		\item (define (<variable> <formals>) <body>)	\hfill syntax
+		\item (define (<variable> . <formal>) <body>)	\hfill syntax
+		
+		R5RS requires definitions to appear at the top level or at the beginning of a <body>. In this implementation, the restriction is removed and definitions can appear at any place that requires an expression. R5RS did not specify the return value, which is an object of void in this implementation.
+	\end{itemize}
+
+\end{itemize}
+
+\subsection{Data Types}
+\noindent
+Supported data types:
+
+\begin{itemize}
+	\item Numbers
+		\begin{itemize}
+			\item Complex
+			\item Real
+			\item Rational
+			\item Integer
+		\end{itemize}
+	
+	\item Booleans
+	
+	\item Pairs and lists
+	
+	\item Symbols
+	
+	\item Characters
+	
+	\item Strings
+	
+	\item Promises
+	
+	\item Procedures
+	
+	\item Void	(To represent unspecified values)
+\end{itemize}
+
+\noindent
+Data types with limited support:
+\begin{itemize}
+	\item Environment (Currently cannot be acquired by users)
+\end{itemize}
+
+\noindent
+Unsupported data types:
+
+\begin{itemize}
+	\item Vectors
+	
+	\item Continuations
+	
+	\item Ports
+\end{itemize}
+
+\subsection{Standard procedures}
+\begin{itemize}
+
+\item R5RS Section 6.1 Equivalence predicates
+	\begin{itemize}
+		\item (eqv? $obj_1$ $obj_2$)	\hfill	procedure		
+		
+		\item (eq? $obj_1$ $obj_2$)	\hfill procedure
+		
+		In this implementation, eq? functions the same as eqv?.
+		
+		\item (equal? $obj_1$ $obj_2$)	\hfill library procedure
+	\end{itemize}
+
+\item R5RS Section 6.2.5 Numerical operations
+	\begin{itemize}
+		\item (number? $obj$)	\hfill	procedure
+		\item (complex? $obj$)	\hfill	procedure
+		\item (real? $obj$)	\hfill	procedure
+		\item (interger? $obj$)	\hfill	procedure
+		
+		\item (exact? $obj$)	\hfill	procedure
+		\item (inexact? $obj$)	\hfill	procedure
+		
+		\item (= $z_1$ $z_2$ $z_3$ ...)	\hfill	procedure
+		\item (< $x_1$ $x_2$ $x_3$ ...)	\hfill	procedure
+		\item (> $x_1$ $x_2$ $x_3$ ...)	\hfill	procedure
+		\item (<= $x_1$ $x_2$ $x_3$ ...)	\hfill	procedure
+		\item (>= $x_1$ $x_2$ $x_3$ ...)	\hfill	procedure
+		
+		\item (zero? $z$)	\hfill	library procedure
+		\item (positive? $x$)	\hfill	library procedure
+		\item (negative? $x$)	\hfill library procedure
+		\item (odd? $n$)	\hfill library procedure
+		\item (even? $n$)	\hfill library procedure
+		
+		\item (max $x_1$ $x_2$ ...)	\hfill	library procedure
+		\item (min $x_1$ $x_2$ ...)	\hfill	library procedure
+		
+		\item (+ $z_1$ ...)	\hfill	procedure
+		\item (* $z_1$ ...)	\hfill	procedure
+		
+		\item (- $z_1$ $z_2$)	\hfill	procedure
+		\item (- $z_1$)	\hfill	procedure
+		\item (- $z_1$ $z_2$ ...)	\hfill	optional procedure
+		\item (- $z_1$ $z_2$)	\hfill	procedure
+		\item (- $z_1$)	\hfill	procedure
+		\item (- $z_1$ $z_2$ ...)	\hfill	optional procedure
+		
+		\item (abs $x$)	\hfill	library procedure
+		
+		\item (quotient $n_1$ $n_2$)	\hfill	procedure
+		\item (remainder $n_1$ $n_2$)	\hfill	procedure
+		\item (modulo $n_1$ $n_2$)	\hfill	procedure
+		
+		\item (gcd $n_1$ ...)	\hfill	library procedure
+		\item (lcm $n_1$ ...)	\hfill	library procedure
+		
+		\item (numerator $q$)	\hfill	procedure
+		\item (denominator $q$)	\hfill	procedure
+		
+		\item (floor $x$)	\hfill	procedure
+		\item (ceiling $x$)	\hfill	procedure
+		\item (truncate $x$)	\hfill procedure
+		\item (round $x$)	\hfill	procedure
+			
+		\item (exp $z$)	\hfill	procedure
+		\item (log $z$)	\hfill	procedure
+		\item (sin $z$)	\hfill	procedure
+		\item (cos $z$)	\hfill	procedure
+		\item (tan $z$)	\hfill	procedure
+		\item (asin $z$)	\hfill	procedure
+		\item (acos $z$)	\hfill	procedure
+		\item (atan $z$)	\hfill	procedure
+		\item (atan $y$ $x$)	\hfill	procedure
+		
+		\item (sqrt $z$)	\hfill	procedure
+		\item (expt $z_1$ $z_2$)	\hfill	procedure
+		
+		\item (make-rectangular $x_1$ $x_2$)	\hfill	procedure
+		\item (make-polar $x_3$ $x_4$)	\hfill	procedure
+		\item (real-part $z$)	\hfill	procedure
+		\item (imag-part $z$)	\hfill	procedure
+		\item (magnitude $z$)	\hfill	procedure
+		\item (angle $z$)	\hfill	procedure		
+		
+		\item (exact->inexact $z$)	\hfill	procedure
+		\item (inexact->exact $z$)	\hfill	procedure
+	\end{itemize}
+	
+	Unsupported features:
+		\begin{itemize}
+			\item (rationalize $x$ $y$)	(Unsupported) \hfill	library procedure
+		\end{itemize}
+			
+	
+\item R5RS Section 6.2.6 Numerical input and output
+	\begin{itemize}
+		\item (number->string $z$)	\hfill	procedure
+		\item (number->string $z$ $radix$)	\hfill	procedure
+		
+		\item (string->number $string$)	\hfill	procedure
+		\item (string->number $string$ $radix$)	\hfill	procedure
+	\end{itemize}
+	
+\item R5RS Section 6.3.1 Booleans
+	\begin{itemize}
+		\item (not $obj$)	\hfill	library procedure
+		
+		\item (boolean? $obj$)	\hfill	library procedure
+	\end{itemize}
+
+\item R5RS Section 6.3.2 Pairs and lists
+	\begin{itemize}
+		\item (pair? $obj$)	\hfill	procedure
+		\item (cons $obj_1$ $obj_2$)	\hfill	procedure
+
+		\item (car $pair$)	\hfill	procedure
+		\item (cdr $pair$)	\hfill	procedure
+		
+		\item (set-car! $pair$)	\hfill	procedure
+		
+		R5RS claims that return value is unspecified. In this implementation, an object of void type is returned.
+		
+		\item (set-cdr! $pair$)	\hfill	procedure
+		
+		R5RS claims that return value is unspecified. In this implementation, an object of void type is returned.
+		
+		\item (caar $pair$)	\hfill	library procedure
+		\item (cadr $pair$)	\hfill	library procedure
+		
+		\qquad $\vdots$
+		
+		\item (cdddar $pair$)	\hfill	library procedure		
+		\item (cddddr $pair$)	\hfill	library procedure
+				
+		\item (null? $obj$)	\hfill	library procedure
+		\item (list? $obj$)	\hfill	library procedure
+		
+		\item (list $obj$ ...)	\hfill	library procedure
+		\item (length $list$)	\hfill	library procedure
+		\item (append $list$ ...)	\hfill	library procedure
+		\item (reverse $list$)	\hfill	library procedure
+		\item (list-tail $list$ $k$)	\hfill	library procedure
+		\item (list-ref $list$ $k$)	\hfill	library procedure
+		
+		Index $k$ in list-tail and list-ref is assumed to fit in an int (usually at most $2^{32}-1$).
+				
+		\item (memq $obj$ $list$)	\hfill	library procedure
+		\item (memv $obj$ $list$)	\hfill	library procedure
+		\item (member $obj$ $list$)	\hfill	library procedure
+		
+		\item (assq $obj$ $alist$)	\hfill	library procedure
+		\item (assv $obj$ $alist$)	\hfill	library procedure
+		\item (assoc $obj$ $alist$)	\hfill	library procedure
+	\end{itemize}
+	
+\item R5RS Section 6.3.3 Symbols
+	\begin{itemize}
+		\item (symbol? $obj$)	\hfill	procedure
+		\item (symbol->string $symbol$)	\hfill	procedure
+		\item (string->symbol $string$)	\hfill	procedure
+	\end{itemize}
+	
+\item R5RS Section 6.3.4 Characters
+	\begin{itemize}
+		\item (char? $obj$)	\hfill	procedure
+		
+		\item (char=? $char_1$ $char_2$)	\hfill	procedure
+		\item (char<? $char_1$ $char_2$)	\hfill	procedure
+		\item (char>? $char_1$ $char_2$)	\hfill	procedure
+		\item (char<=? $char_1$ $char_2$)	\hfill	procedure
+		\item (char>=? $char_1$ $char_2$)	\hfill	procedure
+		
+		\item (char-ci=? $char_1$ $char_2$)	\hfill	library procedure
+		\item (char-ci<? $char_1$ $char_2$)	\hfill	library procedure
+		\item (char-ci>? $char_1$ $char_2$)	\hfill	library procedure
+		\item (char-ci<=? $char_1$ $char_2$)	\hfill	library procedure
+		\item (char-ci>=? $char_1$ $char_2$)	\hfill	library procedure
+		
+		\item (char-alphabetic? $char$)	\hfill	library procedure
+		\item (char-numeric? $char$)	\hfill	library procedure
+		\item (char-whitespace? $char$)	\hfill	library procedure
+		
+		white-space is extended to space( ), horizontal tab($\backslash$t), line feed($\backslash$n), vertical tabl($\backslash$v), form feed($\backslash$f), carriage return($\backslash$r)
+		
+		\item (char-upper-case? $letter$)	\hfill	library procedure
+		\item (char-lower-case? $letter$)	\hfill	library procedure
+		
+		\item (char->integer $char$)	\hfill	procedure
+		\item (integer->char $n$)	\hfill	procedure
+		
+			Currently this implementation only supports ASCII characters.
+			
+		\item (char-upcase $char$)	\hfill	library procedure
+		\item (char-downcase $char$)	\hfill	library procedure
+	\end{itemize}
+
+\item R5RS Section 6.3.5 Strings
+	\begin{itemize}
+		\item (string? $obj$)	\hfill	procedure
+		
+		\item (make-string $k$)	\hfill	procedure
+		\item (make-string $k$ $char$)	\hfill	procedure
+		
+		R5RS claims that if the second argument $char$ is not given, the contents of the string are unspecified. In this implementation, the string is filled with null character($\backslash$0).
+		
+		\item (string $char$ ...)	\hfill	library procedure
+		
+		\item (string-length $string$)	\hfill	procedure
+		
+		\item (string-ref $string$ $k$)	\hfill	procedure
+		\item (string-set! $string$ $k$ $char$)	\hfill	procedure
+		
+		The index $k$ in string-ref and string-set! is assumed to fit in an int (usually at most $2^{31}-1$).
+		
+		R5RS claims that string-set! returns an unspecified value. In this implementation, it returns an object of void type.
+		
+		\item (string=? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string-ci=? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string<? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string>? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string<=? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string>=? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string-ci<? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string-ci>? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string-ci<=? $string_1$ $string_2$)	\hfill	library procedure
+		\item (string-ci>=? $string_1$ $string_2$)	\hfill	library procedure
+		
+		\item (substring $string$ $start$ $end$)	\hfill	library procedure
+		
+		The index in substring is assumed to fit in an int (usually at most $2^{31}-1$).
+		
+		\item (string-append $string$ ...)	\hfill	library procedure
+		
+		\item (string->list $string$)	\hfill	library procedure
+		\item (list->string $list$)	\hfill	library procedure
+		
+		\item (string-copy $string$)	\hfill	library procedure
+		\item (string-fill! $string$ $char$)	\hfill	library procedure 
+		
+		R5RS claims that string-fill! returns an unspecified value. In this implementation, it returns an object of void type.
+				
+	\end{itemize}
+	
+\item R5RS Section 6.3.6 Vectors
+	
+	Unsupported.
+	
+\item R5RS Section 6.4 Control features
+	\begin{itemize}
+		\item (procedure? $obj$)	\hfill	procedure
+		
+		\item (apply $proc$ $arg_1$ ... $args$)	\hfill	procedure
+		
+		\item (map $proc$ $list_1$ $list_2$ ...)	\hfill	library procedure
+		
+		R5RS claims that the dynamic order in which $proc$ is applied to the elements of the lists is unspecified. In this implementation, the order is always from left to right.
+		
+		\item (for-each $proc$ $list_1$ $list_2$ ...)	\hfill	library procedure
+		
+		R5RS claims that the return value of for-each is unspecified. In this implementation, for-each returns an object of void type.
+		
+		\item (force $promise$)	\hfill	library procedure		
+	\end{itemize}
+	
+	Unsupported procedures:
+	\begin{itemize}
+		\item (call-with-current-continuation $proc$) (unsupported)	\hfill	procedure
+		\item (values $obj$ ...) (unsupported)	\hfill	procedure
+		\item (call-with-values $producer$ $consumer$) (unsupported)	\hfill	procedure
+		\item (dynamic-wind $before$ $thunk$ $after$) (unsupported)	\hfill	procedure
+	\end{itemize}
+
+\item R5RS Section 6.5 Eval
+	
+	Unsupporeted.
+	
+\item R5RS Section 6.6.1 Ports
+	
+	Unsupported.
+	
+\item R5RS Section 6.6.2 Input
+	
+	Unsupported.
+	
+\item R5RS Section 6.6.3 Output	
+	\begin{itemize}
+		\item (display $obj$)	\hfill	library procedure
+		
+		\item (newline)	\hfill	library procedure
+	\end{itemize}
+
+	Unsuppoted features:
+	\begin{itemize}
+		\item (write $obj$) (unsupported)	\hfill	library procedure
+		\item (write $obj$ $port$) (unsupported)	\hfill	library procedure		
+		\item (display $obj$ $port$) (unsupported)	\hfill	library procedure
+		\item (newline $port$) (unsupported)	\hfill	library procedure
+		\item (write-char $char$) (unsupported)	\hfill	library procedure
+		\item (write-char $char$ $port$) (unsupported)	\hfill	library procedure
+	\end{itemize}
+
+\item R5RS Section 6.6.4 System interface
+	\begin{itemize}
+		\item (load $filename$)	\hfill	optional procedure
+	\end{itemize}
+	
+	Unsupported features:
+	\begin{itemize}
+		\item (transcript-on $filename$) (unsupported)	\hfill	optional procedure
+		\item (transcript-off) (unsupported)	\hfill	optional procedure	
+	\end{itemize}
+
+\end{itemize}
+
+\subsection{Other implementation features}
+
+\begin{itemize}
+	\item Tail recursion.
+\end{itemize}
+ 
+
+\section{Acknowledgement}
+	
+	I want to thank Hao Chen, Tongliang Liao and Maofan Ying, who has been working on the project, for the  enlightening discussion. I also want to thank our TA Jingcheng Liu for the detailed references on the PPCA website and for answering our questions with great patience.
+
+\bibliographystyle{agsm}
+
+\begin{thebibliography}{99}
+
+\bibitem{R5RS}{R. Kelsey, W. Clinger, J. Rees (eds.), Revised5 Report on the Algorithmic Language Scheme, Higher-Order and Symbolic Computation, Vol. 11, No. 1, August, 1998.}
+
+\bibitem{PNpy}{Peter Norvig. (How to Write a (Lisp) Interpreter (in Python)). From http://norvig.com/lispy.html.}
+
+\bibitem{PNpy2}{Peter Norvig. (An ((Even Better) Lisp) Interpreter (in Python)). From http://norvig.com/lispy2.html.}
+
+\bibitem{GNUMP}{Torbj¨orn Granlund and the GMP development team. (2013). The GNU Multiple Precision Arithmetic Library. From http://http://gmplib.org/.}
+
+\bibitem{GNUMPFR}{The MPFR team. (2013). The Multiple Precision Floating-Point Reliable Library. From http://www.mpfr.org/.}
+
+\bibitem{GNUMPC}{Andreas Enge, Philippe Th´eveny, Paul Zimmermann. (2012). The GNU Multiple Precision Complex Library. From http://www.multiprecision.org/.}
+
+\end{thebibliography}	
+	
+\end{document}
