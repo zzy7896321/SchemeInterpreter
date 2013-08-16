@@ -306,7 +306,7 @@ namespace ParserEnv{
 		//identifier
 		else {
 			//syntatic keyword and variable
-            unsigned i = 0;
+            std::string::size_type i = 0;
 			if ( std::isalpha(token[i]) || specialInitial.find(token[i]) != std::string::npos) ++i;
 			if ( i != 0){
 				for (; i < token.size() && (std::isalpha(token[i]) || std::isdigit(token[i]) || specialInitial.find(token[i]) != std::string::npos || specialSubsequent.find(token[i]) != std::string::npos ); ++i);
@@ -339,7 +339,7 @@ namespace ParserEnv{
 			return PARSE_INVALID_NUMBER;
 		}
 
-		unsigned cur = 0;
+		std::string::size_type cur = 0;
 		int exactness = DEFAULT_EXACTNESS;
 		int radix = 0;
 		while (str[cur] == '#' && cur <= 2){	// at most two prefix denoting radix and exactness
@@ -411,7 +411,7 @@ namespace ParserEnv{
 
 		// complex that has imaginary part in the Cartesian Coordinate
         if (str.back() == 'i'){
-            unsigned iSign = str.find_last_of(signMarker);
+            std::string::size_type iSign = str.find_last_of(signMarker);
 
             if (iSign < cur){
                 obj = nullptr;
@@ -493,7 +493,7 @@ namespace ParserEnv{
         // complex in polar coordinate
         // real
         else {
-            unsigned atMarkPos = str.find('@');
+            std::string::size_type atMarkPos = str.find('@');
 
             // <real R> @ <real R>
             if (atMarkPos != std::string::npos){
@@ -536,7 +536,7 @@ namespace ParserEnv{
 			return PARSE_INVALID_NUMBER;
 		}
 
-        unsigned cur = 0;
+        std::string::size_type cur = 0;
 
 		bool hasSign = false;
 		if (str[cur] == '+' || str[cur] == '-'){
@@ -547,9 +547,9 @@ namespace ParserEnv{
 			}
 		}
 
-		unsigned begin_of_number = cur;
-		unsigned split = str.find_first_of(splitMarker, begin_of_number);
-		unsigned expMarkerPos = (radix == 10) ? str.find_first_of(expMarker, begin_of_number) : std::string::npos;
+		std::string::size_type begin_of_number = cur;
+		std::string::size_type split = str.find_first_of(splitMarker, begin_of_number);
+		std::string::size_type expMarkerPos = (radix == 10) ? str.find_first_of(expMarker, begin_of_number) : std::string::npos;
 
 		// <decimal 10> <suffix>
 		if (expMarkerPos != std::string::npos){
@@ -570,7 +570,7 @@ namespace ParserEnv{
 					if (hasSign && str[begin_of_number - 1] == '-') --begin_of_number;
 					std::string num_str = str.substr(begin_of_number, expMarkerPos - begin_of_number);
 
-					unsigned i = 0;
+					std::string::size_type i = 0;
 					if (num_str[i] == '-') ++i;
 					begin_of_number = i;
 					if ( !std::isdigit(num_str[i])){
@@ -607,7 +607,7 @@ namespace ParserEnv{
 						return PARSE_NORMAL_EXIT;
 					}
 
-				    unsigned errpos = 0;
+				    std::size_t errpos = 0;
 					std::string exp_str = str.substr(expMarkerPos + 1, std::string::npos);
 					int exp_val;
 					try{
@@ -670,7 +670,7 @@ namespace ParserEnv{
 										 ((split == begin_of_number) ? (std::string("-0")) : (str.substr(begin_of_number-1, split - begin_of_number + 1))):
 										 ((split == begin_of_number) ? (std::string("0")) : (str.substr(begin_of_number, split - begin_of_number)) );
 
-					unsigned i = 0;
+					std::string::size_type i = 0;
 					if ( num_str[i] == '-') ++i;
 					begin_of_number = i;
 					if ( !std::isdigit(num_str[i])){
@@ -743,7 +743,7 @@ namespace ParserEnv{
 						return PARSE_NORMAL_EXIT;
 					}
 
-					unsigned errpos = 0;
+					std::size_t errpos = 0;
 					std::string exp_str = str.substr(expMarkerPos + 1, std::string::npos);
 					int exp_val2;
 					try{
@@ -811,7 +811,7 @@ namespace ParserEnv{
                     if (hasSign && str[begin_of_number - 1] == '-') --begin_of_number;
 					std::string num_str = str.substr(begin_of_number, std::string::npos);
 
-					unsigned i = 0;
+					std::string::size_type i = 0;
 					expMarkerPos = expMarkerPos - begin_of_number;
 					if (num_str[i] == '-') ++i;
 					begin_of_number = i;
@@ -863,7 +863,7 @@ namespace ParserEnv{
 				// <digit 10>+ #+ . #* <suffix>
                 else{
                     std::string num_str;
-                    unsigned i = 0;
+                    std::string::size_type i = 0;
                     if (hasSign && str[begin_of_number-1] == '-') {
                         num_str.push_back('-');
                         ++i;
@@ -910,7 +910,7 @@ namespace ParserEnv{
                     }
                     else if (num_str[i] == '#'){
                         num_str[i] = '.';
-                        for (unsigned j = i + 1; j < expMarkerPos; ++j){
+                        for (std::string::size_type j = i + 1; j < expMarkerPos; ++j){
                             if (num_str[j] !='#'){
                                 obj = nullptr;
                                 return PARSE_INVALID_NUMBER;
@@ -925,7 +925,7 @@ namespace ParserEnv{
                         for (++i; i < expMarkerPos; ++i){
                             if (num_str[i] == '#'){
                                 num_str[i] = '0';
-                                for (unsigned j = i+1; j < expMarkerPos; ++j){
+                                for (std::string::size_type j = i+1; j < expMarkerPos; ++j){
                                     if (num_str[j] !='#'){
                                         obj = nullptr;
                                         return PARSE_INVALID_NUMBER;
@@ -969,7 +969,7 @@ namespace ParserEnv{
 			std::string num_str = (hasSign && str[begin_of_number-1] == '-') ? (str.substr(begin_of_number-1))
                                                                              : (str.substr(begin_of_number));
 
-            unsigned i = 0;
+            std::string::size_type i = 0;
             if (str[i] == '-') ++i;
 			if ( (radix <= 10 && (num_str[i] < '0' || num_str[i] >= '0' + radix) )
 						 || (radix == 16 && !( std::isdigit(num_str[i]) || (num_str[i] >= 'a' && num_str[i] <= 'f')))){
@@ -1039,7 +1039,7 @@ namespace ParserEnv{
 										 ((split == begin_of_number) ? (std::string("-0")) : (str.substr(begin_of_number-1, split - begin_of_number + 1))):
 										 ((split == begin_of_number) ? (std::string("0")) : (str.substr(begin_of_number, split - begin_of_number)) );
 
-					unsigned i = 0;
+					std::string::size_type i = 0;
 					if ( num_str[i] == '-') ++i;
 					begin_of_number = i;
 					if ( !std::isdigit(num_str[i])){
@@ -1146,7 +1146,7 @@ namespace ParserEnv{
 			// INEXACT
 			else {
 				std::string num_str;
-				unsigned i = 0;
+				std::string::size_type i = 0;
                 if (hasSign && str[begin_of_number-1] == '-') {
                     num_str.push_back('-');
                     ++i;
@@ -1187,7 +1187,7 @@ namespace ParserEnv{
 
 				if (num_str[i] == '#'){
 					num_str[i] = '.';
-					for (unsigned j = i + 1; j < num_str.size(); ++j){
+					for (std::string::size_type j = i + 1; j < num_str.size(); ++j){
 						if (num_str[j] !='#'){
 							obj = nullptr;
 							return PARSE_INVALID_NUMBER;
@@ -1201,7 +1201,7 @@ namespace ParserEnv{
 					for (++i; i < num_str.size(); ++i){
 						if (num_str[i] == '#'){
 							num_str[i] = '0';
-							for (unsigned j = i+1; j < num_str.size(); ++j){
+							for (std::string::size_type j = i+1; j < num_str.size(); ++j){
 								if (num_str[j] !='#'){
 									obj = nullptr;
 									return PARSE_INVALID_NUMBER;
@@ -1236,7 +1236,7 @@ namespace ParserEnv{
 								  (str.substr(begin_of_number-1, split - begin_of_number+1)) :
 								  (str.substr(begin_of_number, split - begin_of_number)) ;
 
-			unsigned i = 0;
+			std::string::size_type i = 0;
 			if (num_str[i] == '-') ++i;
 			begin_of_number = i;
 			if ((radix <= 10 && (num_str[i] < '0' || num_str[i] >= '0' + radix) )
