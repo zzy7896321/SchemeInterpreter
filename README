@@ -1,7 +1,87 @@
-Scheme interpreter
-PPCA (2013 summer) project
+Scheme interpreter (PPCA 2013 Summer Project)
 
-1. Objective: to implement a subset of r5rs.
+1. The scheme interpreter project is to implement an interpreter of a subset of
+   Revised5 Report on the Algorithmic Language Scheme (R5RS).
 
-2. Known problems:
-	(1) Do no support unicode.
+	Supported features:
+	i)		Most syntax defined in R5RS.
+	ii)		Most data types required in R5RS.
+	iii)	Most builtin procedures and library procedures defined in R5RS.
+	iv)		Tail recursion.
+
+	Unsupported features:
+	i)		Hygienic macros.
+	ii)		Continuation passing style.
+	iii)	Syntax related to macros, library syntax "do"
+	iv)		Vector, port and continuation
+	v)		Procedures related to unsupported features, library procedure "rationalize"
+
+	Note: The implementation has several violation to R5RS details.
+		  For details, please refer to manual.pdf.
+
+2. Compile
+	There is a Code::Blocks project file provieded.
+	
+	The debug mode compile and linking options are:
+		g++ -Wall -fexceptions -std=c++11 -g  -l:libmpc.a -l:libmpfr.a -l:libgmpxx.a -l:libgmp.a
+
+	The release mode compile and linking options are:
+		g++ -Wall -fexceptions -O2 -std=c++11 -DNDEBUG  -l:libmpc.a -l:libmpfr.a -l:libgmpxx.a -l:libgmp.a
+
+	If you want additional dubug infomation, define marco _SCMINTERP_DEBUG_PRINT_.
+	It will turn on file log which records each evaluation in run.log, and
+	print the type of return value of each evaluation. However, when running complicated
+	user-defined procedures, definging the macro may led to a huge performance loss and
+	rapid consumption of disk space because of the recording of evalution.
+
+	The scheme interpreter project used 3 thrid-party library: GNU GMP, GNU MPFR, GNU MPC.
+	These libraries needs to be installed on your system. In the cbp file, the linking
+	options are all static:
+		-l:libmpc.a -l:libmpfr.c -l:libgmpxx.a -l:libgmp.a
+	For more details on these libraries, refer to their websites:
+		http://gmplib.org
+		http://www.mpfr.org
+		http://www.multiprecision.org
+
+	source files are:
+		./builtin/*
+		./interp/*
+		./object/*
+		./parser/*
+		./prompt/*
+		config.cpp
+		config.h
+
+3. Run
+	schemeInterpreter [OPTIONS]...
+
+	Valid options:
+	-h                              Show this help and exit.
+
+	-l <filename>                   Load the specified file before interaction begins.
+									Multiple files can be loaded by providing multiple -l parameters.
+									Files would be loaded in the sequence they're provided.
+									By default, no file will be loaded.
+
+	-f <precision>                  Set the floating point precision. Input that is less than 64 will be ignored.
+									The default precision is 128. Only the last valid input will take effect.
+
+	-cl <length>                    Set the maximum length of inexact number literal that would be
+									stored as integer or rational. The default length is 10.
+									Set length to 0 to forbid such conversion.
+
+	-mp <length>                	Set the maximum length of prefix zero that a real number will be displayed. If
+									a real number cannot be displayed in fixed point form without exceeding the limit,
+									it will be displayed in scientific form. The default length is 10.
+									Set length to 0 to disable prefix zero.
+								
+	-np                             Disable protection of builtin symbols.
+	
+	If there is no options provided, the program will use the default configuration and directly enter
+	interaction mode. Otherwise, the options are processed sequentially and enter the interaction mode
+	using the provided configuration.
+
+4. Author: Zhuoyue Zhao
+   Contact me at zzy7896321@163.com
+
+

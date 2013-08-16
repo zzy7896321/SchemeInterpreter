@@ -1,0 +1,458 @@
+# depslib dependency file v1.0
+1374973272 source:/home/zzy/projects/schemeInterpreter/main.cpp
+	"parser.h"
+	<string>
+	<iostream>
+	<sstream>
+	<cstdio>
+
+1374973343 
+
+1374940561 /home/zzy/projects/schemeInterpreter/parser.h
+	<string>
+	<iostream>
+	<utility>
+	<cctype>
+
+1374940880 source:/home/zzy/projects/schemeInterpreter/parser.cpp
+	"parser.h"
+	<cctype>
+	<cstring>
+	<utility>
+	<sstream>
+	<fstream>
+	<cassert>
+
+1374973272 source:d:\schemeinterpreter\main.cpp
+	"parser.h"
+	<string>
+	<iostream>
+	<sstream>
+	<cstdio>
+
+1374940561 d:\schemeinterpreter\parser.h
+	<string>
+	<iostream>
+	<utility>
+	<cctype>
+
+1374973343 source:d:\schemeinterpreter\parser.cpp
+	"parser.h"
+	<cctype>
+	<cstring>
+	<utility>
+	<sstream>
+	<fstream>
+	<cassert>
+
+1376285246 source:/home/zzy/projects/schemeInterpreter/interp/builtin.cpp
+	"../object/objectdef.h"
+	"errorinfo.h"
+	"../prompt/prompt_declaration.h"
+	<utility>
+	<string>
+	<sstream>
+
+1376333581 /home/zzy/projects/schemeInterpreter/object/objectdef.h
+	"boolean.h"
+	"builtin.h"
+	"char.h"
+	"complex.h"
+	"environment.h"
+	"expression_pack.h"
+	"int.h"
+	"number.h"
+	"numberop.h"
+	"object.h"
+	"pair.h"
+	"procedure.h"
+	"rational.h"
+	"real.h"
+	"scm_list.h"
+	"scm_string.h"
+	"symbol.h"
+	"void.h"
+	"promise.h"
+	"common_constants.h"
+
+1376536545 /home/zzy/projects/schemeInterpreter/object/boolean.h
+	"object.h"
+	<memory>
+	<iostream>
+
+1376536590 /home/zzy/projects/schemeInterpreter/object/object.h
+	<iostream>
+	<string>
+	<memory>
+
+1376488830 /home/zzy/projects/schemeInterpreter/object/builtin.h
+	"numberop.h"
+	"scm_list.h"
+	"object.h"
+	"../interp/errorinfo.h"
+	<vector>
+	<memory>
+	<utility>
+	<functional>
+	<initializer_list>
+	<tuple>
+
+1376464312 /home/zzy/projects/schemeInterpreter/object/numberop.h
+	"object.h"
+	"number.h"
+	"int.h"
+	"real.h"
+	"boolean.h"
+	"rational.h"
+	"complex.h"
+	<memory>
+	<string>
+
+1376444595 /home/zzy/projects/schemeInterpreter/object/number.h
+	"object.h"
+	<memory>
+	<string>
+	<iostream>
+
+1376491794 /home/zzy/projects/schemeInterpreter/object/int.h
+	"number.h"
+	<memory>
+	<sstream>
+	<gmpxx.h>
+
+1376560276 /home/zzy/projects/schemeInterpreter/object/real.h
+	"number.h"
+	<iomanip>
+	<sstream>
+	<gmpxx.h>
+
+1376490466 /home/zzy/projects/schemeInterpreter/object/rational.h
+	"number.h"
+	<sstream>
+	<gmpxx.h>
+
+1376491633 /home/zzy/projects/schemeInterpreter/object/complex.h
+	"numberop.h"
+	"number.h"
+	<gmpxx.h>
+	<memory>
+	<cassert>
+
+1376275255 /home/zzy/projects/schemeInterpreter/object/scm_list.h
+	"object.h"
+	"pair.h"
+	<memory>
+
+1376383616 /home/zzy/projects/schemeInterpreter/object/pair.h
+	"object.h"
+	<memory>
+	<stack>
+	<sstream>
+
+1376536143 /home/zzy/projects/schemeInterpreter/interp/errorinfo.h
+	<string>
+	<utility>
+	<vector>
+	"../parser/parsetree.h"
+
+1376535934 /home/zzy/projects/schemeInterpreter/parser/parsetree.h
+	"../object/object.h"
+	<memory>
+	<tuple>
+	<utility>
+	<string>
+	<iostream>
+
+1376383461 /home/zzy/projects/schemeInterpreter/object/char.h
+	"object.h"
+	"int.h"
+	<memory>
+	<cstring>
+
+1376489150 /home/zzy/projects/schemeInterpreter/object/environment.h
+	"object.h"
+	<memory>
+	<map>
+	<iostream>
+
+1376383545 /home/zzy/projects/schemeInterpreter/object/expression_pack.h
+	"object.h"
+	<memory>
+	"../parser/parsetree.h"
+
+1376489251 /home/zzy/projects/schemeInterpreter/object/procedure.h
+	"object.h"
+	"environment.h"
+	"pair.h"
+	"builtin.h"
+	"../parser/parsetree.h"
+	"../interp/errorinfo.h"
+	<vector>
+	<memory>
+	<utility>
+
+1376383733 /home/zzy/projects/schemeInterpreter/object/scm_string.h
+	"object.h"
+	"int.h"
+	"char.h"
+	<memory>
+	<string>
+	<utility>
+
+1376383741 /home/zzy/projects/schemeInterpreter/object/symbol.h
+	"object.h"
+	<string>
+	<memory>
+	<utility>
+
+1376493558 source:/home/zzy/projects/schemeInterpreter/interp/errorinfo.cpp
+	"errorinfo.h"
+
+1376479922 source:/home/zzy/projects/schemeInterpreter/interp/evaluation.cpp
+	"evaluation.h"
+	<iostream>
+	"../prompt/prompt_declaration.h"
+
+1376536459 /home/zzy/projects/schemeInterpreter/interp/evaluation.h
+	"errorinfo.h"
+	"syntax.h"
+
+1376536491 /home/zzy/projects/schemeInterpreter/interp/syntax.h
+	<map>
+	<string>
+	<utility>
+	<functional>
+	<cassert>
+	<memory>
+	<stack>
+	<vector>
+	"../parser/parsetree.h"
+	"../object/objectdef.h"
+	"errorinfo.h"
+
+1376204743 source:/home/zzy/projects/schemeInterpreter/interp/procedure.cpp
+	"../object/objectdef.h"
+	"errorinfo.h"
+	"evaluation.h"
+	<utility>
+	<stack>
+	<iostream>
+
+1376533172 source:/home/zzy/projects/schemeInterpreter/interp/syntax.cpp
+	"syntax.h"
+	"evaluation.h"
+	<algorithm>
+
+1376415704 source:/home/zzy/projects/schemeInterpreter/object/int.cpp
+	"int.h"
+	"rational.h"
+	<limits>
+	<memory>
+
+1376474612 source:/home/zzy/projects/schemeInterpreter/object/numberop.cpp
+	"numberop.h"
+	"common_constants.h"
+	<limits>
+	<gmpxx.h>
+	<cassert>
+	<type_traits>
+	<gmp.h>
+	<mpfr.h>
+	<mpc.h>
+	<vector>
+
+1376330716 source:/home/zzy/projects/schemeInterpreter/object/rational.cpp
+	"rational.h"
+	"int.h"
+	<gmp.h>
+	<memory>
+
+1376562396 source:/home/zzy/projects/schemeInterpreter/object/real.cpp
+	"real.h"
+	"int.h"
+	"rational.h"
+	"../config.h"
+	<gmp.h>
+	<cstdlib>
+	<cstring>
+
+1376314406 source:/home/zzy/projects/schemeInterpreter/object/scm_string.cpp
+	"scm_string.h"
+	<cstddef>
+	<cassert>
+
+1376569481 source:/home/zzy/projects/schemeInterpreter/parser/parser.cpp
+	<cctype>
+	<cstring>
+	<utility>
+	<sstream>
+	<fstream>
+	<cassert>
+	<memory>
+	<limits>
+	<stdexcept>
+	<gmpxx.h>
+	<algorithm>
+	"../object/objectdef.h"
+	"parser.h"
+	"../config.h"
+
+1376535880 /home/zzy/projects/schemeInterpreter/parser/parser.h
+	<string>
+	<iostream>
+	<utility>
+	<cctype>
+	<memory>
+	"parsetree.h"
+
+1376479531 source:/home/zzy/projects/schemeInterpreter/parser/parsingError.cpp
+	<string>
+	"parser.h"
+
+1376567669 source:/home/zzy/projects/schemeInterpreter/prompt/main.cpp
+	"../config.h"
+	"prompt_declaration.h"
+	<cstring>
+	<iostream>
+	<vector>
+	<string>
+	<fstream>
+
+1376536658 /home/zzy/projects/schemeInterpreter/prompt/prompt_declaration.h
+	<iostream>
+	"../parser/parsetree.h"
+	"../object/object.h"
+	<memory>
+
+1376492272 source:/home/zzy/projects/schemeInterpreter/prompt/read_eval_loop.cpp
+	"prompt_declaration.h"
+	<string>
+	<cstdio>
+	<utility>
+	"../parser/parser.h"
+	"../parser/parsetree.h"
+	"../object/objectdef.h"
+	"../interp/evaluation.h"
+
+1376221600 source:/home/zzy/projects/schemeInterpreter/prompt/debug_print.cpp
+	"prompt_declaration.h"
+	<iostream>
+	<string>
+	<memory>
+	"../object/object.h"
+
+1376286509 source:/home/zzy/projects/schemeInterpreter/object/pair.cpp
+	"pair.h"
+	<map>
+	<stack>
+	<sstream>
+
+1376383758 /home/zzy/projects/schemeInterpreter/object/void.h
+	"object.h"
+	<memory>
+
+1376290358 source:/home/zzy/projects/schemeInterpreter/builtin/equivalence_predicates.cpp
+	"builtinproc.h"
+
+1376536018 /home/zzy/projects/schemeInterpreter/builtin/builtinproc.h
+	"../object/objectdef.h"
+	"../interp/errorinfo.h"
+	<memory>
+	<vector>
+	<iostream>
+
+1376492659 source:/home/zzy/projects/schemeInterpreter/builtin/initbuiltin.cpp
+	"builtinproc.h"
+	<iostream>
+
+1376567104 source:/home/zzy/projects/schemeInterpreter/builtin/pairs_and_lists.cpp
+	"builtinproc.h"
+	"../prompt/prompt_declaration.h"
+	<queue>
+	<stack>
+	<gmpxx.h>
+
+1376383684 /home/zzy/projects/schemeInterpreter/object/promise.h
+	"object.h"
+	"expression_pack.h"
+	"environment.h"
+	"../interp/errorinfo.h"
+	"../parser/parsetree.h"
+	<memory>
+	<utility>
+
+1376222792 source:/home/zzy/projects/schemeInterpreter/object/promise.cpp
+	"promise.h"
+	"../interp/evaluation.h"
+
+1376378381 source:/home/zzy/projects/schemeInterpreter/builtin/control_features.cpp
+	"builtinproc.h"
+	<cassert>
+
+1376503251 source:/home/zzy/projects/schemeInterpreter/builtin/numeric_operations.cpp
+	"builtinproc.h"
+	"../prompt/prompt_declaration.h"
+
+1376491351 source:/home/zzy/projects/schemeInterpreter/builtin/output.cpp
+	"builtinproc.h"
+	"../object/numberop.h"
+
+1376271367 source:/home/zzy/projects/schemeInterpreter/builtin/booleans.cpp
+	"builtinproc.h"
+
+1376275666 source:/home/zzy/projects/schemeInterpreter/object/scm_list.cpp
+	"scm_list.h"
+	<memory>
+	<set>
+
+1376296420 source:/home/zzy/projects/schemeInterpreter/builtin/symbols.cpp
+	"builtinproc.h"
+
+1376294088 source:/home/zzy/projects/schemeInterpreter/builtin/characters.cpp
+	"builtinproc.h"
+	<cctype>
+
+1376318165 source:/home/zzy/projects/schemeInterpreter/builtin/strings.cpp
+	"builtinproc.h"
+	<algorithm>
+	<cctype>
+
+1376329188 source:/home/zzy/projects/schemeInterpreter/builtin/system_interface.cpp
+	"builtinproc.h"
+	"../prompt/prompt_declaration.h"
+	<fstream>
+
+1376493136 /home/zzy/projects/schemeInterpreter/object/common_constants.h
+	"int.h"
+	<memory>
+
+1376491706 source:/home/zzy/projects/schemeInterpreter/object/complex.cpp
+	"number.h"
+	"int.h"
+	"rational.h"
+	"real.h"
+	"numberop.h"
+	"common_constants.h"
+	<memory>
+	<cassert>
+
+1376560700 source:/home/zzy/projects/schemeInterpreter/config.cpp
+	"config.h"
+	"builtin/builtinproc.h"
+	<cstdio>
+	<gmpxx.h>
+	<gmp.h>
+
+1376560689 /home/zzy/projects/schemeInterpreter/config.h
+	<cstdio>
+	<gmp.h>
+
+1376499598 source:/home/zzy/projects/schemeInterpreter/builtin/numerical_input_and_output.cpp
+	"builtinproc.h"
+	"../parser/parser.h"
+	<iomanip>
+	<sstream>
+	<cstdio>
+	<gmpxx.h>
+	<gmp.h>
+
