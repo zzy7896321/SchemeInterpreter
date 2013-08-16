@@ -687,8 +687,8 @@ callResultType reverse_func(parameterType param, sptrObject& obj){
     obj = param[0];
     sptrObject last = ObjectDef::EmptyList::getEmptyList();
     while (obj != ObjectDef::EmptyList::getEmptyList()){
-        last.swap(static_cast<ObjectDef::Pair*>(obj.get())->cdr);
-        last.swap(obj);
+        last = sptrObject(new ObjectDef::Pair(ObjectDef::getCar(obj), last));
+        obj = ObjectDef::getCdr(obj);
     }
     obj = last;
 	return std::make_pair(Interp::EVAL_NO_ERROR, "");
